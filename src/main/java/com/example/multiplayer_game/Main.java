@@ -5,10 +5,12 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.effect.Light;
+//import javafx.scene.effect.Light;
 import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
+import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +22,8 @@ public class Main extends Application {
     private static final int ROWS = 20;
     private static final int COLUMNS = ROWS;
     private static final int SQUARE_SIZE = WIDTH / ROWS;
-    private static final String[] FOOD_IMAGE = new String[] {"/images/apple.png", "/images/cherry.png", "/images/strawberry.png"};
+    private static final String[] FOOD_IMAGE = new String[] {"apple.png", "cherry.png", "strawberry.png", "coconut.png",
+    "orange.png", "peach.png", "pomegranate.png"};
 
     private static final int RIGHT = 0;
     private static final int LEFT = 1;
@@ -29,9 +32,10 @@ public class Main extends Application {
 
 
     private GraphicsContext gc;
-    private List<Light.Point> snakeBody = new ArrayList<>();
-    private Light.Point snakeHead;
+    private List<Point> snakeBody = new ArrayList<>();
+    private Point snakeHead;
     private Image foodImage;
+    private Image defaultImage;
     private int foodX;
     private int foodY;
     private boolean gameOver;
@@ -47,14 +51,73 @@ public class Main extends Application {
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
         primaryStage.show();
+        gc = canvas.getGraphicsContext2D();
+//        defaultImage = new Image(getClass().getResourceAsStream("peach.png"));
+        for (int i = 0; i < 3; i++) {
+            snakeBody.add(new Point(5, ROWS / 2));
+        }
+        snakeHead = snakeBody.get(0);
+        foodImage = new Image(getClass().getResourceAsStream("peach.png"));
+        generateFood();
+        run(gc);
     }
 
-    private void run() {
+    private void run(GraphicsContext gc) {
+        drawBackground(gc);
+        drawFood(gc);
+        drawSnake(gc);
+    }
+
+    private void drawBackground(GraphicsContext gc) {
+        for (int i = 0; i < ROWS; i++) {
+            for (int j = 0; j < COLUMNS; j++) {
+                if ((i + j) % 2 == 0) {
+                    gc.setFill(Color.web("AAD751"));
+                } else {
+                    gc.setFill(Color.web("A2D149"));
+                }
+                gc.fillRect(i * SQUARE_SIZE, j * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+            }
+        }
 
     }
 
-    private void drawBackground() {
+    private void generateFood() {
+//        With this it only generates one type of food.
+        foodX = (int) (Math.random() * ROWS);
+        foodY = (int) (Math.random() * COLUMNS);
 
+//        start:
+//        while (true) {
+//            foodX = (int) (Math.random() * ROWS);
+//            foodY = (int) (Math.random() * COLUMNS);
+//
+//            for (Point snake : snakeBody) {
+//                if (snake.getX() == foodX && snake.getY() == foodY) {
+//                    continue start;
+//                }
+//            }
+//            foodImage = new Image(FOOD_IMAGE[(int) (Math.random() * FOOD_IMAGE.length)]);
+//            if (foodImage == null) {
+//                foodImage = defaultImage;
+//            }
+//            break;
+//
+//        }
+    }
+
+    private void drawFood(GraphicsContext gc) {
+        gc.drawImage(foodImage, foodX * SQUARE_SIZE,foodY * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+    }
+
+    private void drawSnake(GraphicsContext gc) {
+        gc.setFill(Color.web("4674E9"));
+        gc.fillRoundRect(snakeHead.getX() * SQUARE_SIZE, snakeHead.getY() * SQUARE_SIZE, SQUARE_SIZE - 1, SQUARE_SIZE - 1, 35, 35);
+
+        for (int i = 1; i < snakeBody.size(); i ++) {
+            gc.fillRoundRect(snakeBody.get(i).getX() * SQUARE_SIZE, snakeBody.get(i).getY() * SQUARE_SIZE, SQUARE_SIZE - 1,
+                    SQUARE_SIZE - 1, 20, 20);
+        }
     }
 
     public static void main(String[] args) {
