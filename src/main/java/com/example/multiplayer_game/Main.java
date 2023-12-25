@@ -1,14 +1,21 @@
 package com.example.multiplayer_game;
 
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 //import javafx.scene.effect.Light;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.awt.*;
 import java.io.IOException;
@@ -52,6 +59,30 @@ public class Main extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
         gc = canvas.getGraphicsContext2D();
+
+        scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                KeyCode code = event.getCode();
+                if (code == KeyCode.RIGHT || code == KeyCode.D) {
+                    if (currentDirection != LEFT) {
+                        currentDirection = RIGHT;
+                    }
+                } else if (code == KeyCode.LEFT || code == KeyCode.A) {
+                    if (currentDirection != RIGHT) {
+                        currentDirection = LEFT;
+                    }
+                } else if (code == KeyCode.UP || code == KeyCode.W) {
+                    if (currentDirection != DOWN) {
+                        currentDirection = UP;
+                    }
+                } else if (code == KeyCode.DOWN || code == KeyCode.S) {
+                    if (currentDirection != UP) {
+                        currentDirection = DOWN;
+                    }
+                }
+            }
+        });
 //        defaultImage = new Image(getClass().getResourceAsStream("peach.png"));
         for (int i = 0; i < 3; i++) {
             snakeBody.add(new Point(5, ROWS / 2));
@@ -59,13 +90,37 @@ public class Main extends Application {
         snakeHead = snakeBody.get(0);
         foodImage = new Image(getClass().getResourceAsStream("peach.png"));
         generateFood();
-        run(gc);
+
+//        run(gc);
+        Timeline timeline = new Timeline(new KeyFrame(Duration.millis(130), e->run(gc)));
+        timeline.setCycleCount(Animation.INDEFINITE);
+        timeline.play();
     }
 
     private void run(GraphicsContext gc) {
         drawBackground(gc);
         drawFood(gc);
         drawSnake(gc);
+
+        for (int i = snakeBody.size() - 1; i >= 1; i--) {
+            snakeBody.get(i).x = snakeBody.get(i - 1).x;
+            snakeBody.get(i).y = snakeBody.get(i - 1).y;
+        }
+
+        switch (currentDirection) {
+            case RIGHT:
+                moveRight();
+                break;
+            case LEFT:
+                moveLeft();
+                break;
+            case UP:
+                moveUp();
+                break;
+            case DOWN:
+                moveDown();
+                break;
+        }
     }
 
     private void drawBackground(GraphicsContext gc) {
@@ -118,6 +173,19 @@ public class Main extends Application {
             gc.fillRoundRect(snakeBody.get(i).getX() * SQUARE_SIZE, snakeBody.get(i).getY() * SQUARE_SIZE, SQUARE_SIZE - 1,
                     SQUARE_SIZE - 1, 20, 20);
         }
+    }
+
+    private void moveRight() {
+        snakeHead.x++;
+    }
+    private void moveLeft() {
+        snakeHead.x--;
+    }
+    private void moveUp() {
+        snakeHead.y--;
+    }
+    private void moveDown() {
+        snakeHead.y++;
     }
 
     public static void main(String[] args) {
