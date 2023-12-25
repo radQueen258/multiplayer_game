@@ -14,6 +14,7 @@ import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -47,6 +48,7 @@ public class Main extends Application {
     private int foodY;
     private boolean gameOver;
     private int currentDirection;
+    private int score = 0;
 
 
     @Override
@@ -98,9 +100,16 @@ public class Main extends Application {
     }
 
     private void run(GraphicsContext gc) {
+        if (gameOver) {
+            gc.setFill(Color.RED);
+            gc.setFont(new Font("Digital-7", 70));
+            gc.fillText("Game Over", WIDTH / 3.5, HEIGHT / 2);
+            return;
+        }
         drawBackground(gc);
         drawFood(gc);
         drawSnake(gc);
+        drawScore();
 
         for (int i = snakeBody.size() - 1; i >= 1; i--) {
             snakeBody.get(i).x = snakeBody.get(i - 1).x;
@@ -121,6 +130,9 @@ public class Main extends Application {
                 moveDown();
                 break;
         }
+
+        gameOver();
+        eatFood();
     }
 
     private void drawBackground(GraphicsContext gc) {
@@ -186,6 +198,33 @@ public class Main extends Application {
     }
     private void moveDown() {
         snakeHead.y++;
+    }
+
+    public void gameOver() {
+        if (snakeHead.x < 0 || snakeHead.y < 0 || snakeHead.x * SQUARE_SIZE >= WIDTH || snakeHead.y * SQUARE_SIZE >= HEIGHT) {
+            gameOver = true;
+        }
+
+        for (int i = 1; i < snakeBody.size(); i++) {
+            if (snakeHead.x == snakeBody.get(i).getX() && snakeHead.getY() == snakeBody.get(i).getY()) {
+                gameOver = true; // KILLS ITSELF
+                break;
+            }
+        }
+    }
+
+    private void eatFood() {
+        if (snakeHead.getX() == foodX && snakeHead.getY() == foodY){
+            snakeBody.add(new Point(-1, -1));
+            generateFood();
+            score += 5;
+        }
+    }
+
+    private void drawScore() {
+        gc.setFill(Color.WHITE);
+        gc.setFont(new Font("Digital-7", 35));
+        gc.fillText("Score: " + score, 10, 35);
     }
 
     public static void main(String[] args) {
